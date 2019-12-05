@@ -28,9 +28,11 @@ const router = express.Router();
 router.get('/api/articles', (request, response) => {
     Article.find()
         .then((articles) => {
-            response.status(200).json({ message: 'Welcome to /api/articles' })
+            // Return all Articles as an Array
+            response.status(200).json({ articles: articles })
         })
         .catch((error) => {
+            // Catch any errors that might occur
             response.status(500).json({ error: error })
         })
 });
