@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 
 // Require Route Files
 const indexRouter = require('./app/routes/index');
+const articlesRouter = require('./app/routes/articles');
+
 //Require the DB Configuration file
 const db = require('./config/db')
 // Establish Database Connection
