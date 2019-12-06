@@ -1,21 +1,16 @@
+/***************************
+ * *********ROUTER***********
+ * article routers
+ ****************************/
+
 // Require necessary npm packages
 const express = require('express');
 
 //Require Mongoose Model for Article
-const Article = require('../models/article')
+const Article = require('../models/article').Article;
 
 // Instantiate a Router , which is basically a mini app that only handles routes.
 const router = express.Router();
-
-
-/****************************************************************
- * #	Action 	URL      	 HTTP Verb	mongoose method             *
- * 1	Index  	/logs    	 GET      	Log.find({})                *
- * 2	Show   	/logs/:id	 GET      	Log.findById(req.params.id) *
- * 3	Create 	/logs    	 POST     	Log.create(req.body)        *
- * 4	Update 	/logs/:id	 PUT/PATCH	Log.findByIdAndUpdate()     *
- * 5	Destroy	/logs    	 DELETE   	Log.findByIdAndRemove()     *
- ****************************************************************/
 
 
 /**
@@ -45,8 +40,27 @@ router.get('/api/articles', (request, response) => {
  */
 
 router.get('/api/articles/:id', (request, response) => {
-    response.json({ message: `You are seeing the article with the ID ${requset.params.id}` })
-});
+    Article.findById(request.params.id)
+        .then((reqArticle) => {
+            if (reqArticle) {
+                // Pass the result of Mongoose's '.get' method to the next '.then' statment
+                response.status(200).json({ article: reqArticle });
+            } else {
+                // If we couldn't find a document with the matching ID
+                response.status(404).json({
+                    error: {
+                        name: "DocumentNotFoundError",
+                        message: " the provided ID doesn\'t match any document"
+                    }
+                })
+            }
+        })
+        // Catch any errors
+        .catch((error) => {
+            response.status(500).json({ error: error })
+        })
+})
+
 
 /**
  * Action:      Create
@@ -74,9 +88,33 @@ router.post('/api/articles', (request, response) => {
 * URI:         /api/articles/79f548s97877f5w45
 * Description: Update an Article by Article ID
 */
-router.get('/api/articles', (request, response) => {
-    response.status(200).json({ message: 'Welcome to /api/article created' })
-});
+router.patch('/api/articles/:id', (request, response) => {
+    Article.findById(request.params.id)
+        .then((article) => {
+            if (article) {
+                // Pass the result of Mongoose's '.patch' method to the next '.then' statment
+                return article.updateOne(request.body.article);
+            } else {
+                // If we couldn't find a document with the matching ID
+                response.status(404).json({
+                    error: {
+                        name: "DocumentNotFoundError",
+                        message: " the provided ID doesn\'t match any document"
+                    }
+                })
+            }
+        })
+        // then for the article ".remove()" method
+        .then((newArticle) => {
+            // If the update succeeded, return 202 and no JSON
+            response.status(202).json({ newArticle });
+        })
+        // Catch any errors
+        .catch((error) => {
+            response.status(500).json({ error: error })
+        })
+})
+
 /**
 * Action:      DESTROY
 * Method:      DELETE
